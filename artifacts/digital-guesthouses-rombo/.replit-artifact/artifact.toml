@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Digital Guesthouses Rombo"
+description = "A multi-page hospitality website for Digital Guesthouses Rombo in Rombo, Kenya, showcasing two guesthouses, Winners Restaurant, conference facilities, galleries, and a WhatsApp-first booking journey."
+version = "1.0.0"
+id = "artifacts/digital-guesthouses-rombo"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24161
+
+[services.development]
+run = "pnpm --filter @workspace/digital-guesthouses-rombo run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/digital-guesthouses-rombo", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/digital-guesthouses-rombo/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24161"
+BASE_PATH = "/"
