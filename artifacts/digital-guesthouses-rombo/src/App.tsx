@@ -22,6 +22,65 @@ const gallery = [
   { src: image('secondary-IMG20260325221430_01.jpg'), label: 'Reception, Rombo' },
 ];
 
+const restaurantMenu = [
+  {
+    category: 'Breakfast',
+    items: [
+      ['Battered Eggs Sandwich & Milkshake', 'KES 300'],
+      ['Boiled Eggs, Kebab, Toast & Smoothie', 'KES 350'],
+      ['Chapo Mayai', 'KES 100'],
+      ['Spanish Omelette', 'KES 100'],
+      ['Plain Omelette', 'KES 100'],
+      ['Deep-fried Plantain & Strong Tea', 'KES 100'],
+      ['Battered Toast & Chai', 'KES 100'],
+      ['Chai & Mandazi', 'KES 60'],
+      ['Black Coffee', 'KES 60'],
+      ['White Coffee', 'KES 80'],
+      ['Fresh Milk', 'KES 60'],
+      ['Smokies (each)', 'KES 50'],
+      ['2 Fried Eggs', 'KES 80'],
+      ['African Tea', 'KES 40'],
+      ['Chapati (each)', 'KES 20'],
+      ['Mandazi (each)', 'KES 10'],
+      ['Special Tea', 'KES 80'],
+      ['Masala Tea', 'KES 50'],
+      ['Dawa', 'KES 100'],
+    ],
+  },
+  {
+    category: 'Main dishes',
+    items: [
+      ['Nyama Choma (1 kg)', 'KES 1,000'],
+      ['Nyama Fry (1 kg)', 'KES 1,000'],
+      ['Grilled Tilapia', 'KES 1,000'],
+      ['Chicken Barbecue', 'KES 1,000'],
+      ['Ugali with Greens', 'KES 100'],
+      ['Biryani Chicken', 'KES 400'],
+      ['Pilau', 'KES 200'],
+      ['Ugali & Maziwa Mala', 'KES 100'],
+      ['Beans & Chapati', 'KES 90'],
+    ],
+  },
+  {
+    category: 'Sides',
+    items: [
+      ['Kachumbari', 'KES 50'],
+      ['Cabbage Salad', 'KES 50'],
+      ['Cucumber Salad', 'KES 50'],
+    ],
+  },
+  {
+    category: 'Beverages',
+    items: [
+      ['Cocktail', 'KES 100'],
+      ['Mocktail', 'KES 50'],
+      ['Fresh Juice', 'KES 100'],
+      ['Soda', 'KES 50'],
+      ['Yogurt', 'KES 100'],
+    ],
+  },
+] as const;
+
 function whatsappUrl(message: string) {
   return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 }
@@ -157,7 +216,22 @@ function PropertyPage({ premium }: { premium: boolean }) {
 }
 
 function Restaurant() {
-  return <Shell><main><PageHero eyebrow="Winners Restaurant" title={<>The best part of<br /><em>coming back.</em></>} text="Local Kenyan cuisine, easy room service, and a table that makes a long day feel finished." /><section className="section"><div className="container split reverse"><div className="image-frame"><img src={image('secondary-IMG20260325221430_01.jpg')} alt="The entrance and reception at Winners Restaurant" /><span className="image-caption">On site at Mt. Betheli</span></div><div className="copy"><div className="eyebrow">A seat is waiting</div><h3>Good food does not need a dress code.</h3><p>Winners Restaurant is the shared heart of the two guesthouses. Start with breakfast, refuel between drives, or order in when the only plan is a quiet evening.</p><div className="feature-list"><div className="feature">Kenyan staples</div><div className="feature">Breakfast options</div><div className="feature">Safari group meals</div><div className="feature">Room service</div></div><WhatsAppButton message="Hello Winners Restaurant, I would like to ask about the menu and a table." children="Ask about the menu" /></div></div></section><section className="section dark-band"><div className="container split"><div className="copy"><div className="eyebrow">For the road ahead</div><h3>Order in. Eat well. Go further.</h3><p>Tell us what time you are heading out and we can help make breakfast, packed meals, or dinner fit the day.</p><WhatsAppButton message="Hello Winners Restaurant, I am staying at Digital Guesthouses Rombo and would like to arrange a meal." className="btn btn-light" children="Plan a meal" /></div><div className="image-frame"><img src={image('IMG_7074.JPG.jpg')} alt="A guest room prepared for a restful night" /></div></div></section></main></Shell>;
+  return <Shell><main>
+    <PageHero eyebrow="Winners Restaurant" title={<>The best part of<br /><em>coming back.</em></>} text="Local Kenyan cuisine, easy room service, and a table that makes a long day feel finished." />
+    <section className="section"><div className="container split reverse">
+      <div className="image-frame"><img src={image('winners-restaurant-exterior.jpg')} alt="Winners Restaurant exterior in Rombo" /><span className="image-caption">Winners Restaurant · Rombo</span></div>
+      <div className="copy"><div className="eyebrow">A seat is waiting</div><h3>Good food does not need a dress code.</h3><p>Winners Restaurant is the shared heart of the two guesthouses. Start with breakfast, refuel between drives, or order in when the only plan is a quiet evening.</p><div className="feature-list"><div className="feature">Kenyan staples</div><div className="feature">Breakfast options</div><div className="feature">Safari group meals</div><div className="feature">Room service</div></div><WhatsAppButton message="Hello Winners Restaurant, I would like to ask about the menu and a table." children="Ask about the menu" /></div>
+    </div></section>
+    <section className="section menu-section"><div className="container">
+      <div className="section-head"><div><div className="eyebrow">The Winners table</div><h2>Come hungry.<br />Leave happy.</h2></div><p>Every item is available to order through WhatsApp. Tap any dish and your message will be ready to send.</p></div>
+      <div className="menu-grid">{restaurantMenu.map((group) => <div className="menu-category" key={group.category}>
+        <div className="menu-category-head"><h3>{group.category}</h3><span>WhatsApp to order</span></div>
+        <div className="menu-items">{group.items.map(([name, price], index) => <a data-testid={`link-menu-${group.category.toLowerCase().replaceAll(' ', '-')}-${index}`} className="menu-item" href={whatsappUrl(`Hello Winners Restaurant, I would like to order ${name} for ${price}. Please confirm availability.`)} target="_blank" rel="noreferrer" key={name}><span>{name}</span><strong>{price}</strong><MessageCircle size={13} /></a>)}</div>
+      </div>)}</div>
+      <div className="menu-order-note"><div><strong>Ordering is simple.</strong><span>Send us your choices, preferred pickup or delivery time, and any special notes.</span></div><WhatsAppButton message="Hello Winners Restaurant, I would like to place an order. Please share today's availability." className="btn btn-dark" children="Start an order" /></div>
+    </div></section>
+    <section className="section dark-band"><div className="container split"><div className="copy"><div className="eyebrow">For the road ahead</div><h3>Order in. Eat well. Go further.</h3><p>Tell us what time you are heading out and we can help make breakfast, packed meals, or dinner fit the day.</p><WhatsAppButton message="Hello Winners Restaurant, I am staying at Digital Guesthouses Rombo and would like to arrange a meal." className="btn btn-light" children="Plan a meal" /></div><div className="image-frame"><img src={image('IMG_7074.JPG.jpg')} alt="A guest room prepared for a restful night" /></div></div></section>
+  </main></Shell>;
 }
 
 function Conference() {
