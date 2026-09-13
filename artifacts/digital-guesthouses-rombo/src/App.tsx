@@ -20,6 +20,17 @@ const gallery = [
   { src: image('IMG_6936.JPG'), label: 'Conference room, ready for your team' },
   { src: image('IMG_6941.JPG'), label: 'A flexible room for gathering' },
   { src: image('secondary-IMG20260325221430_01.jpg'), label: 'Reception, Rombo' },
+  { src: image('IMG_6795@349828382.JPG.jpg'), label: 'Mt. Betheli single room' },
+  { src: image('IMG_6796@349828383.JPG.jpg'), label: 'A quiet room corner' },
+  { src: image('IMG_6797@349828384.JPG.jpg'), label: 'En-suite bathroom' },
+  { src: image('IMG_6806@349828414.JPG.jpg'), label: 'A bright guest room' },
+  { src: image('IMG_6808@349828416.JPG.jpg'), label: 'Room with a mosquito net' },
+  { src: image('IMG_6813@349828442.JPG.jpg'), label: 'A restful Mt. Betheli room' },
+  { src: image('IMG_6814@349828443.JPG.jpg'), label: 'Room detail at Mt. Betheli' },
+  { src: image('IMG_6815@349828444.JPG.jpg'), label: 'A room ready for the night' },
+  { src: image('IMG_6816@349828445.JPG.jpg'), label: 'Guesthouse corridor after dark' },
+  { src: image('secondary-IMG_7044.JPG.jpg'), label: 'Mt. Betheli Digital Guesthouse' },
+  { src: image('secondary-IMG_7046.JPG.jpg'), label: 'Mt. Betheli from the road' },
 ];
 
 const restaurantMenu = [
