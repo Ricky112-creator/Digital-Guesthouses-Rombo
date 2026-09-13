@@ -81,8 +81,16 @@ const restaurantMenu = [
   },
 ] as const;
 
+const orderModes = ['Dine in', 'Drive through', 'Take away', 'Delivery'] as const;
+type OrderMode = typeof orderModes[number];
+type CartItem = { name: string; price: number; quantity: number };
+
 function whatsappUrl(message: string) {
   return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+}
+
+function parsePrice(price: string) {
+  return Number(price.replaceAll(',', '').replace('KES ', ''));
 }
 
 function WhatsAppButton({ message, children = 'Book on WhatsApp', className = 'btn btn-primary' }: { message: string; children?: ReactNode; className?: string }) {
@@ -216,6 +224,38 @@ function PropertyPage({ premium }: { premium: boolean }) {
 }
 
 function Restaurant() {
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [orderMode, setOrderMode] = useState<OrderMode>('Dine in');
+  const [orderNote, setOrderNote] = useState('');
+  const [orderSent, setOrderSent] = useState(false);
+  const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
+  const cartTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  const quantityFor = (name: string) => cart.find((item) => item.name === name)?.quantity ?? 0;
+  const addToCart = (name: string, priceLabel: string) => {
+    const price = parsePrice(priceLabel);
+    setCart((current) => {
+      const existing = current.find((item) => item.name === name);
+      if (existing) return current.map((item) => item.name === name ? { ...item, quantity: item.quantity + 1 } : item);
+      return [...current, { name, price, quantity: 1 }];
+    });
+    setOrderSent(false);
+  };
+  const changeQuantity = (name: string, delta: number) => {
+    setCart((current) => current.flatMap((item) => {
+      if (item.name !== name) return [item];
+      const quantity = item.quantity + delta;
+      return quantity > 0 ? [{ ...item, quantity }] : [];
+    }));
+    setOrderSent(false);
+  };
+  const placeOrder = () => {
+    if (!cart.length) return;
+    const itemLines = cart.map((item) => `• ${item.quantity} × ${item.name} — KES ${(item.price * item.quantity).toLocaleString()}`).join('\n');
+    const extra = orderNote.trim() ? `\nNotes: ${orderNote.trim()}` : '';
+    const message = `Hello Winners Restaurant, I would like to place an order.\n\nOrder type: ${orderMode}\n${itemLines}\n\nTotal: KES ${cartTotal.toLocaleString()}${extra}\n\nPlease confirm availability and the estimated time.`;
+    setOrderSent(true);
+    window.open(whatsappUrl(message), '_blank', 'noopener,noreferrer');
+  };
   return <Shell><main>
     <PageHero eyebrow="Winners Restaurant" title={<>The best part of<br /><em>coming back.</em></>} text="Local Kenyan cuisine, easy room service, and a table that makes a long day feel finished." />
     <section className="section"><div className="container split reverse">
@@ -223,12 +263,26 @@ function Restaurant() {
       <div className="copy"><div className="eyebrow">A seat is waiting</div><h3>Good food does not need a dress code.</h3><p>Winners Restaurant is the shared heart of the two guesthouses. Start with breakfast, refuel between drives, or order in when the only plan is a quiet evening.</p><div className="feature-list"><div className="feature">Kenyan staples</div><div className="feature">Breakfast options</div><div className="feature">Safari group meals</div><div className="feature">Room service</div></div><WhatsAppButton message="Hello Winners Restaurant, I would like to ask about the menu and a table." children="Ask about the menu" /></div>
     </div></section>
     <section className="section menu-section"><div className="container">
-      <div className="section-head"><div><div className="eyebrow">The Winners table</div><h2>Come hungry.<br />Leave happy.</h2></div><p>Every item is available to order through WhatsApp. Tap any dish and your message will be ready to send.</p></div>
+      <div className="section-head"><div><div className="eyebrow">The Winners table</div><h2>Come hungry.<br />Leave happy.</h2></div><p>Add your favourites to the order tray, choose how you want to enjoy them, and see the full total before you message the team.</p></div>
       <div className="menu-grid">{restaurantMenu.map((group) => <div className="menu-category" key={group.category}>
-        <div className="menu-category-head"><h3>{group.category}</h3><span>WhatsApp to order</span></div>
-        <div className="menu-items">{group.items.map(([name, price], index) => <a data-testid={`link-menu-${group.category.toLowerCase().replaceAll(' ', '-')}-${index}`} className="menu-item" href={whatsappUrl(`Hello Winners Restaurant, I would like to order ${name} for ${price}. Please confirm availability.`)} target="_blank" rel="noreferrer" key={name}><span>{name}</span><strong>{price}</strong><MessageCircle size={13} /></a>)}</div>
+        <div className="menu-category-head"><h3>{group.category}</h3><span>Add to order</span></div>
+        <div className="menu-items">{group.items.map(([name, price], index) => <button data-testid={`button-menu-${group.category.toLowerCase().replaceAll(' ', '-')}-${index}`} className="menu-item" type="button" onClick={() => addToCart(name, price)} key={name}><span>{name}</span><strong>{price}</strong><span className="menu-add">{quantityFor(name) ? `${quantityFor(name)} added` : 'Add'}</span></button>)}</div>
       </div>)}</div>
-      <div className="menu-order-note"><div><strong>Ordering is simple.</strong><span>Send us your choices, preferred pickup or delivery time, and any special notes.</span></div><WhatsAppButton message="Hello Winners Restaurant, I would like to place an order. Please share today's availability." className="btn btn-dark" children="Start an order" /></div>
+      <div className="order-builder" id="order-builder">
+        <div className="order-builder-head"><div><div className="eyebrow">Your order</div><h3>{cartCount ? `${cartCount} ${cartCount === 1 ? 'item' : 'items'} selected` : 'Build your order'}</h3></div><span>Prices in KES</span></div>
+        <div className="order-builder-grid">
+          <div className="order-options">
+            <div className="field"><label>How would you like it?</label><div className="order-mode-grid">{orderModes.map((mode) => <button data-testid={`button-order-mode-${mode.toLowerCase().replaceAll(' ', '-')}`} type="button" className={`order-mode ${orderMode === mode ? 'selected' : ''}`} onClick={() => setOrderMode(mode)} key={mode}>{mode}</button>)}</div></div>
+            <div className="field"><label htmlFor="restaurant-order-note">{orderMode === 'Delivery' ? 'Delivery location & notes' : 'Special notes'}</label><textarea data-testid="textarea-restaurant-order-note" id="restaurant-order-note" value={orderNote} onChange={(event) => setOrderNote(event.target.value)} placeholder={orderMode === 'Delivery' ? 'Where should we deliver? Add landmarks or timing.' : 'Extra sauce, no onions, pickup time...'}/></div>
+          </div>
+          <aside className="order-cart" aria-live="polite">
+            {cart.length ? <div className="cart-items">{cart.map((item) => <div className="cart-item" key={item.name}><div><strong>{item.name}</strong><span>KES {item.price.toLocaleString()} each</span></div><div className="quantity-control"><button type="button" aria-label={`Remove one ${item.name}`} onClick={() => changeQuantity(item.name, -1)}>−</button><b>{item.quantity}</b><button type="button" aria-label={`Add one ${item.name}`} onClick={() => changeQuantity(item.name, 1)}>+</button></div><strong className="cart-line-total">KES {(item.price * item.quantity).toLocaleString()}</strong></div>)}</div> : <div className="cart-empty"><MessageCircle size={18}/><p>Your order tray is empty.<br/><span>Tap Add beside a dish to start.</span></p></div>}
+            <div className="cart-total"><span>Total</span><strong>KES {cartTotal.toLocaleString()}</strong></div>
+            <button data-testid="button-restaurant-order" type="button" className="btn btn-primary order-submit" disabled={!cart.length} onClick={placeOrder}>Order on WhatsApp <MessageCircle size={15}/></button>
+            {orderSent && <div className="booking-success"><strong>Your order is ready.</strong> WhatsApp should have opened with your items, order type, and total.</div>}
+          </aside>
+        </div>
+      </div>
     </div></section>
     <section className="section dark-band"><div className="container split"><div className="copy"><div className="eyebrow">For the road ahead</div><h3>Order in. Eat well. Go further.</h3><p>Tell us what time you are heading out and we can help make breakfast, packed meals, or dinner fit the day.</p><WhatsAppButton message="Hello Winners Restaurant, I am staying at Digital Guesthouses Rombo and would like to arrange a meal." className="btn btn-light" children="Plan a meal" /></div><div className="image-frame"><img src={image('IMG_7074.JPG.jpg')} alt="A guest room prepared for a restful night" /></div></div></section>
   </main></Shell>;
