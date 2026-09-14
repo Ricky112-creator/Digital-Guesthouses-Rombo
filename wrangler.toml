@@ -1,0 +1,6 @@
+name = "digital-guesthouses-rombo"
+pages_build_output_dir = "./artifacts/digital-guesthouses-rombo/dist/public"
+
+[vars]
+PORT = "3000"
+BASE_PATH = "/"
