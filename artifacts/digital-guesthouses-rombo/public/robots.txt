@@ -1,2 +1,3 @@
 User-agent: *
 Allow: /
+Sitemap: https://digital-guesthouses-rombo--rickywhite254.replit.app/sitemap.xml
